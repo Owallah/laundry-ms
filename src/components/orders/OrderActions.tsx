@@ -68,57 +68,84 @@ export default function OrderActions({ order }: { order: Order }) {
     const customer = order.customer as { name: string; phone: string } | undefined;
     const serviceType = order.service_type as { name: string } | undefined;
 
-    const win = window.open("", "_blank", "width=400,height=600");
-    if (!win) return;
+    // Pop-up guard — browsers may block window.open silently
+    const win = window.open("", "_blank", "width=420,height=650");
+    if (!win) {
+      toast.error("Pop-up blocked. Please allow pop-ups for this site and try again.");
+      return;
+    }
 
-    win.document.write(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>Receipt – ${order.order_number}</title>
-        <style>
-          * { margin: 0; padding: 0; box-sizing: border-box; }
-          body { font-family: 'Courier New', monospace; font-size: 12px; padding: 20px; width: 300px; }
-          .center { text-align: center; }
-          .bold { font-weight: bold; }
-          .line { border-top: 1px dashed #000; margin: 8px 0; }
-          .row { display: flex; justify-content: space-between; margin: 3px 0; }
-          h1 { font-size: 18px; margin-bottom: 2px; }
-          h2 { font-size: 13px; font-weight: normal; }
-        </style>
-      </head>
-      <body>
-        <div class="center">
-          <h1>Jamari</h1>
-          <h2>Laundry Management</h2>
-          <p>Tel: +254 700 000 000</p>
-        </div>
-        <div class="line"></div>
-        <div class="row"><span class="bold">Order #</span><span>${order.order_number}</span></div>
-        <div class="row"><span class="bold">Date</span><span>${formatDate(order.created_at)}</span></div>
-        <div class="row"><span class="bold">Customer</span><span>${customer?.name ?? "—"}</span></div>
-        <div class="row"><span class="bold">Phone</span><span>${customer?.phone ?? "—"}</span></div>
-        <div class="line"></div>
-        <div class="row"><span>${serviceType?.name ?? "Laundry"}</span><span></span></div>
-        <div class="row"><span>${order.weight_kg} kg × KES ${order.price_per_kg}</span><span>KES ${order.subtotal.toLocaleString()}</span></div>
-        ${order.discount > 0 ? `<div class="row"><span>Discount</span><span>-KES ${order.discount.toLocaleString()}</span></div>` : ""}
-        <div class="line"></div>
-        <div class="row bold"><span>TOTAL</span><span>KES ${order.total.toLocaleString()}</span></div>
-        <div class="row"><span>Paid</span><span>KES ${order.amount_paid.toLocaleString()}</span></div>
-        <div class="row bold"><span>Balance Due</span><span>KES ${Math.max(0, order.total - order.amount_paid).toLocaleString()}</span></div>
-        <div class="line"></div>
-        ${order.pickup_date ? `<div class="row"><span class="bold">Pickup Date</span><span>${formatDate(order.pickup_date)}</span></div>` : ""}
-        ${order.pickup_time_slot ? `<div class="row"><span class="bold">Time Slot</span><span>${order.pickup_time_slot}</span></div>` : ""}
-        <div class="line"></div>
-        <div class="center">
-          <p>Thank you for choosing Jamari!</p>
-          <p>Keep this receipt for pickup.</p>
-        </div>
-      </body>
-      </html>
-    `);
+    // Coerce Supabase NUMERIC strings to actual numbers
+    const subtotal    = Number(order.subtotal);
+    const discount    = Number(order.discount);
+    const total       = Number(order.total);
+    const amountPaid  = Number(order.amount_paid);
+    const balanceDue  = Math.max(0, total - amountPaid);
+    const pricePerKg  = Number(order.price_per_kg);
+    const weightKg    = Number(order.weight_kg);
+
+    const fmt = (n: number) => n.toLocaleString("en-KE", { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+
+    const html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Receipt – ${order.order_number}</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Courier New', monospace; font-size: 12px; padding: 20px; width: 300px; color: #000; }
+    .center { text-align: center; }
+    .bold { font-weight: bold; }
+    .line { border-top: 1px dashed #000; margin: 8px 0; }
+    .row { display: flex; justify-content: space-between; margin: 3px 0; }
+    h1 { font-size: 20px; margin-bottom: 2px; font-family: Arial, sans-serif; }
+    h2 { font-size: 12px; font-weight: normal; margin-bottom: 2px; }
+    @media print {
+      body { margin: 0; padding: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="center">
+    <h1>FreshFlow</h1>
+    <h2>Laundry Management</h2>
+    <p>Tel: +254 700 000 000</p>
+  </div>
+  <div class="line"></div>
+  <div class="row"><span class="bold">Order #</span><span>${order.order_number}</span></div>
+  <div class="row"><span class="bold">Date</span><span>${formatDate(order.created_at)}</span></div>
+  <div class="row"><span class="bold">Customer</span><span>${customer?.name ?? "—"}</span></div>
+  <div class="row"><span class="bold">Phone</span><span>${customer?.phone ?? "—"}</span></div>
+  <div class="line"></div>
+  <div class="row"><span class="bold">Service</span><span>${serviceType?.name ?? "Laundry"}</span></div>
+  <div class="row"><span>${weightKg} kg × KES ${fmt(pricePerKg)}</span><span>KES ${fmt(subtotal)}</span></div>
+  ${discount > 0 ? `<div class="row"><span>Discount</span><span>-KES ${fmt(discount)}</span></div>` : ""}
+  <div class="line"></div>
+  <div class="row bold"><span>TOTAL</span><span>KES ${fmt(total)}</span></div>
+  <div class="row"><span>Paid</span><span>KES ${fmt(amountPaid)}</span></div>
+  <div class="row bold" style="color:${balanceDue > 0 ? "#c00" : "#000"}"><span>Balance Due</span><span>KES ${fmt(balanceDue)}</span></div>
+  <div class="line"></div>
+  ${order.pickup_date ? `<div class="row"><span class="bold">Pickup Date</span><span>${formatDate(order.pickup_date)}</span></div>` : ""}
+  ${order.pickup_time_slot ? `<div class="row"><span class="bold">Time Slot</span><span>${order.pickup_time_slot}</span></div>` : ""}
+  <div class="line"></div>
+  <div class="center">
+    <p>Thank you for choosing FreshFlow!</p>
+    <p>Keep this receipt for pickup.</p>
+  </div>
+</body>
+</html>`;
+
+    // Write content then wait for onload before printing
+    // This prevents the blank-print race condition
+    win.document.open();
+    win.document.write(html);
     win.document.close();
-    win.print();
+
+    // onload fires once the document is fully parsed and rendered
+    win.onload = () => {
+      win.focus();
+      win.print();
+    };
   }
 
   return (
@@ -126,7 +153,7 @@ export default function OrderActions({ order }: { order: Order }) {
       {/* Print receipt */}
       <button
         onClick={printReceipt}
-        className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium border border-[var(--color-border)] rounded-xl hover:bg-[var(--color-surface)] transition"
+        className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium border border-border rounded-xl hover:bg-surface transition"
       >
         <Printer className="w-4 h-4" />
         Receipt
