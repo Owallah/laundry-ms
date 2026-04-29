@@ -87,7 +87,7 @@ export default async function AnalyticsPage() {
   // Service breakdown chart
   const svcMap: Record<string, { name: string; orders: number; revenue: number }> = {};
   (serviceBreakdown ?? []).forEach((o) => {
-    const name = (o.service_type as { name: string } | undefined)?.name ?? "Unknown";
+    const name = (o.service_type as unknown as { name: string } | undefined)?.name ?? "Unknown";
     if (!svcMap[name]) svcMap[name] = { name, orders: 0, revenue: 0 };
     svcMap[name].orders += 1;
     svcMap[name].revenue += Number(o.total);
