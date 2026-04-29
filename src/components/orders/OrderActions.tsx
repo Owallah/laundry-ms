@@ -65,28 +65,36 @@ export default function OrderActions({ order }: { order: Order }) {
   }
 
   function printReceipt() {
-    const customer = order.customer as { name: string; phone: string } | undefined;
-    const serviceType = order.service_type as { name: string } | undefined;
+  const customer = order.customer as { name: string; phone: string } | undefined;
+  const serviceType = order.service_type as { name: string } | undefined;
 
-    // Pop-up guard — browsers may block window.open silently
-    const win = window.open("", "_blank", "width=420,height=650");
-    if (!win) {
-      toast.error("Pop-up blocked. Please allow pop-ups for this site and try again.");
-      return;
-    }
+  const subtotal = Number(order.subtotal);
+  const discount = Number(order.discount);
+  const total = Number(order.total);
+  const amountPaid = Number(order.amount_paid);
+  const balanceDue = Math.max(0, total - amountPaid);
+  const pricePerKg = Number(order.price_per_kg);
+  const weightKg = Number(order.weight_kg);
 
-    // Coerce Supabase NUMERIC strings to actual numbers
-    const subtotal    = Number(order.subtotal);
-    const discount    = Number(order.discount);
-    const total       = Number(order.total);
-    const amountPaid  = Number(order.amount_paid);
-    const balanceDue  = Math.max(0, total - amountPaid);
-    const pricePerKg  = Number(order.price_per_kg);
-    const weightKg    = Number(order.weight_kg);
+  const fmt = (n: number) => n.toLocaleString("en-KE", { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 
-    const fmt = (n: number) => n.toLocaleString("en-KE", { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+  // Create hidden iframe
+  const iframe = document.createElement('iframe');
+  iframe.style.position = 'absolute';
+  iframe.style.width = '0';
+  iframe.style.height = '0';
+  iframe.style.border = 'none';
+  document.body.appendChild(iframe);
 
-    const html = `<!DOCTYPE html>
+  const iframeDoc = iframe.contentWindow?.document;
+  if (!iframeDoc) {
+    toast.error("Could not create print document");
+    return;
+  }
+
+  iframeDoc.open();
+  iframeDoc.write(`
+<!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8" />
@@ -133,27 +141,26 @@ export default function OrderActions({ order }: { order: Order }) {
     <p>Keep this receipt for pickup.</p>
   </div>
 </body>
-</html>`;
+</html>
+  `);
+  iframeDoc.close();
 
-    // Write content then wait for onload before printing
-    // This prevents the blank-print race condition
-    win.document.open();
-    win.document.write(html);
-    win.document.close();
-
-    // onload fires once the document is fully parsed and rendered
-    win.onload = () => {
-      win.focus();
-      win.print();
-    };
-  }
+  // Print and cleanup
+  iframe.contentWindow?.focus();
+  iframe.contentWindow?.print();
+  
+  // Remove iframe after print dialog closes
+  setTimeout(() => {
+    document.body.removeChild(iframe);
+  }, 1000);
+}
 
   return (
     <div className="flex items-center gap-2 flex-wrap">
       {/* Print receipt */}
       <button
         onClick={printReceipt}
-        className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium border border-border rounded-xl hover:bg-surface transition"
+        className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium border border-[var(--color-border)] rounded-xl hover:bg-[var(--color-surface)] transition"
       >
         <Printer className="w-4 h-4" />
         Receipt
