@@ -45,7 +45,7 @@ export default function AddStaffModal() {
   const inputClass =
     "w-full px-3 py-2.5 text-sm border border-[var(--color-border)] rounded-xl focus:outline-none focus:border-brand-400 focus:ring-1 focus:ring-brand-400 transition bg-white";
   const labelClass = "block text-sm font-medium text-[var(--color-text-secondary)] mb-1.5";
-
+// FreshFlow 
   return (
     <>
       <button
@@ -61,9 +61,9 @@ export default function AddStaffModal() {
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setOpen(false)} />
           <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 z-10">
             <div className="flex items-center justify-between mb-5">
-              <h3 className="font-bold text-lg text-[var(--color-text-primary)]">Add Staff Member</h3>
-              <button onClick={() => setOpen(false)} className="p-1.5 hover:bg-[var(--color-surface)] rounded-lg transition">
-                <X className="w-4 h-4 text-[var(--color-text-secondary)]" />
+              <h3 className="font-bold text-lg text-text-primary">Add Staff Member</h3>
+              <button onClick={() => setOpen(false)} className="p-1.5 hover:bg-surface rounded-lg transition">
+                <X className="w-4 h-4 text-text-secondary" />
               </button>
             </div>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -73,7 +73,7 @@ export default function AddStaffModal() {
               </div>
               <div>
                 <label className={labelClass}>Email *</label>
-                <input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} required placeholder="john@jamari.co.ke" className={inputClass} />
+                <input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} required placeholder="john@freshflow.co.ke" className={inputClass} />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -101,12 +101,12 @@ export default function AddStaffModal() {
                   placeholder="Min 8 characters"
                   className={inputClass}
                 />
-                <p className="text-xs text-[var(--color-text-tertiary)] mt-1">
+                <p className="text-xs text-text-tertiary mt-1">
                   Staff should change this on first login
                 </p>
               </div>
               <div className="flex gap-3 justify-end pt-1">
-                <button type="button" onClick={() => setOpen(false)} className="px-4 py-2.5 text-sm font-medium border border-[var(--color-border)] rounded-xl hover:bg-[var(--color-surface)] transition">
+                <button type="button" onClick={() => setOpen(false)} className="px-4 py-2.5 text-sm font-medium border border-border rounded-xl hover:bg-surface transition">
                   Cancel
                 </button>
                 <button type="submit" disabled={loading} className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-600 hover:bg-brand-700 disabled:opacity-60 text-white text-sm font-semibold rounded-xl transition">

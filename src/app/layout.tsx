@@ -3,7 +3,7 @@ import { Toaster } from "react-hot-toast";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Jamari — Laundry Management",
+  title: "FreshFlow — Laundry Management",
   description: "Professional laundry business management system",
   icons: { icon: "/favicon.ico" },
 };

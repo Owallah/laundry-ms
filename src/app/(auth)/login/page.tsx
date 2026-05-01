@@ -47,7 +47,7 @@ export default function LoginPage() {
             <Droplets className="w-8 h-8 text-brand-300" />
           </div>
           <h1 className="text-3xl font-display font-bold text-white tracking-tight">
-            Jamari
+            FreshFlow
           </h1>
           <p className="text-brand-300 text-sm mt-1">Laundry Management System</p>
         </div>

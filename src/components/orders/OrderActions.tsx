@@ -91,7 +91,7 @@ export default function OrderActions({ order }: { order: Order }) {
     toast.error("Could not create print document");
     return;
   }
-
+// FreshFlow receipt
   iframeDoc.open();
   iframeDoc.write(`
 <!DOCTYPE html>

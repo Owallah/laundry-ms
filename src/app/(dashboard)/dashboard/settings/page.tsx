@@ -51,7 +51,7 @@ export default async function SettingsPage() {
         />
       </section>
 
-      {/* System info */}
+      {/* System info*/}
       <section>
         <div className="flex items-center gap-2 mb-3">
           <Settings className="w-4 h-4 text-[var(--color-text-secondary)]" />
@@ -59,7 +59,7 @@ export default async function SettingsPage() {
         </div>
         <div className="card p-5 grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
           {[
-            { label: "System", value: "Jamari LMS" },
+            { label: "System", value: "FreshFlow LMS" },
             { label: "Version", value: "1.0.0" },
             { label: "Currency", value: "KES (Kenyan Shilling)" },
             { label: "Pricing Model", value: "Per kilogram (kg)" },

@@ -21,7 +21,7 @@ function getTitle(pathname: string): string {
   if (PAGE_TITLES[pathname]) return PAGE_TITLES[pathname];
   if (pathname.startsWith("/dashboard/orders/")) return "Order Details";
   if (pathname.startsWith("/dashboard/customers/")) return "Customer Profile";
-  return "Jamari";
+  return "FreshFlow";
 }
 
 export default function TopBar({ profile }: { profile: Profile | null }) {

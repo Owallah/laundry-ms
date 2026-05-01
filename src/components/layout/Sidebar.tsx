@@ -60,7 +60,7 @@ export default function Sidebar({ profile }: { profile: Profile | null }) {
           <Droplets className="w-4.5 h-4.5 text-white" />
         </div>
         <span className="font-display font-bold text-white text-lg tracking-tight">
-          Jamari
+          FreshFlow
         </span>
       </div>
 
