@@ -4,7 +4,7 @@ import { formatKES, formatDateTime, formatDate } from "@/lib/utils";
 import { OrderStatusBadge, PaymentStatusBadge } from "@/components/ui/StatusBadge";
 import OrderActions from "@/components/orders/OrderActions";
 import PaymentPanel from "@/components/payments/PaymentPanel";
-import { Scale, Calendar, User, Truck, Clock, FileText } from "lucide-react";
+import { Scale, Calendar, User, Truck, Clock, FileText, UserCog } from "lucide-react";
 import type { Order, OrderStatusHistory, Payment } from "@/types";
 
 export default async function OrderDetailPage({
@@ -86,6 +86,14 @@ export default async function OrderDetailPage({
                 label="Time Slot"
                 value={o.pickup_time_slot ?? "Any time"}
               />
+              {/* Assigned staff */}
+              {o.assigned_staff && (
+                <Detail
+                  icon={UserCog}
+                  label="Assigned To"
+                  value={`${(o.assigned_staff as { full_name: string }).full_name} (${(o.assigned_staff as { role: string }).role})`}
+                />
+              )}
               {o.is_delivery && (
                 <Detail
                   icon={Truck}
@@ -169,6 +177,11 @@ export default async function OrderDetailPage({
                     <span className="text-xs text-[var(--color-text-tertiary)]">
                       {formatDateTime(h.created_at)}
                     </span>
+                    {h.profile && (
+                      <span className="text-xs text-[var(--color-text-tertiary)]">
+                        · by {(h.profile as { full_name: string }).full_name}
+                      </span>
+                    )}
                   </div>
                   {h.notes && (
                     <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">{h.notes}</p>
@@ -235,12 +248,12 @@ function Detail({
   return (
     <div className={className}>
       <div className="flex items-center gap-1.5 mb-1">
-        <Icon className="w-3.5 h-3.5 text-[var(--color-text-tertiary)]" />
-        <p className="text-xs font-semibold text-[var(--color-text-tertiary)] uppercase tracking-wide">
+        <Icon className="w-3.5 h-3.5 text-text-tertiary" />
+        <p className="text-xs font-semibold text-text-tertiary uppercase tracking-wide">
           {label}
         </p>
       </div>
-      <p className="text-sm font-medium text-[var(--color-text-primary)]">{value}</p>
+      <p className="text-sm font-medium text-text-primary">{value}</p>
     </div>
   );
 }

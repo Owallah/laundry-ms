@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Plus, Filter, LayoutGrid } from "lucide-react";
 import { formatKES, formatDate } from "@/lib/utils";
@@ -11,6 +12,7 @@ interface SearchParams {
   payment?: string;
   q?: string;
   page?: string;
+  mine?: string;
 }
 
 export default async function OrdersPage({
@@ -20,6 +22,7 @@ export default async function OrdersPage({
 }) {
   const params = await searchParams;
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
   const page = parseInt(params.page ?? "1");
   const pageSize = 20;
   const offset = (page - 1) * pageSize;
@@ -37,6 +40,9 @@ export default async function OrdersPage({
   if (params.payment) query = query.eq("payment_status", params.payment);
   if (params.q) {
     query = query.ilike("order_number", `%${params.q}%`);
+  }
+  if (params.mine === "1" && user) {
+    query = query.eq("assigned_to", user.id);
   }
 
   const { data: orders, count } = await query;
@@ -71,7 +77,21 @@ export default async function OrdersPage({
       </div>
 
       {/* Filters */}
-      <OrderFilters />
+      <div className="flex flex-col sm:flex-row gap-3">
+        <OrderFilters />
+        <div className="flex items-center gap-1.5">
+          <a
+            href={params.mine === "1" ? "/dashboard/orders" : "/dashboard/orders?mine=1"}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition border ${
+              params.mine === "1"
+                ? "bg-brand-600 text-white border-brand-600"
+                : "bg-white border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[var(--color-border-strong)]"
+            }`}
+          >
+            My Orders
+          </a>
+        </div>
+      </div>
 
       {/* Table */}
       <div className="card overflow-hidden">
@@ -195,7 +215,7 @@ export default async function OrdersPage({
               {page < totalPages && (
                 <Link
                   href={`?page=${page + 1}`}
-                  className="px-3 py-1.5 text-sm border border-[var(--color-border)] rounded-lg hover:bg-[var(--color-surface)] transition"
+                  className="px-3 py-1.5 text-sm border border-border rounded-lg hover:bg-surface transition"
                 >
                   Next
                 </Link>

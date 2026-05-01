@@ -3,7 +3,6 @@ import { formatKES } from "@/lib/utils";
 import { AlertTriangle, Package } from "lucide-react";
 import InventoryItemCard from "@/components/inventory/InventoryItemCard";
 import AddInventoryModal from "@/components/inventory/AddInventoryModal";
-import RestockModal from "@/components/inventory/RestockModal";
 import type { InventoryItem } from "@/types";
 
 export default async function InventoryPage() {
@@ -43,8 +42,8 @@ export default async function InventoryPage() {
     <div className="max-w-6xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-[var(--color-text-primary)]">Inventory</h1>
-          <p className="text-sm text-[var(--color-text-tertiary)] mt-0.5">
+          <h1 className="text-xl font-bold text-text-primary">Inventory</h1>
+          <p className="text-sm text-text-tertiary mt-0.5">
             {allItems.length} items tracked
           </p>
         </div>
@@ -80,7 +79,7 @@ export default async function InventoryPage() {
             const catItems = allItems.filter((i) => i.category === cat);
             return (
               <div key={cat}>
-                <h2 className="font-semibold text-[var(--color-text-secondary)] text-sm uppercase tracking-wide mb-3">
+                <h2 className="font-semibold text-text-secondary text-sm uppercase tracking-wide mb-3">
                   {CATEGORY_LABELS[cat] ?? cat}
                 </h2>
                 <div className="space-y-2">
@@ -95,12 +94,12 @@ export default async function InventoryPage() {
 
         {/* Recent transactions */}
         <div className="card overflow-hidden h-fit">
-          <div className="px-5 py-4 border-b border-[var(--color-border)]">
-            <h2 className="font-semibold text-[var(--color-text-primary)]">
+          <div className="px-5 py-4 border-b border-border">
+            <h2 className="font-semibold text-text-primary">
               Recent Activity
             </h2>
           </div>
-          <div className="divide-y divide-[var(--color-border)]">
+          <div className="divide-y divide-border">
             {recentTxns && recentTxns.length > 0 ? (
               recentTxns.map((txn) => {
                 const item = txn.item as { name: string; unit: string } | undefined;
@@ -110,32 +109,51 @@ export default async function InventoryPage() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Package className="w-3.5 h-3.5 text-[var(--color-text-tertiary)]" />
-                        <span className="text-xs font-medium text-[var(--color-text-primary)] truncate max-w-[120px]">
+                        <span className="text-xs font-medium text-[var(--color-text-primary)] truncate max-w-[110px]">
                           {item?.name}
                         </span>
                       </div>
-                      <span
-                        className={`text-xs font-bold tabular-nums ${
-                          isIn ? "text-emerald-600" : "text-red-500"
-                        }`}
-                      >
-                        {isIn ? "+" : ""}
-                        {txn.quantity} {item?.unit}
+                      <span className={`text-xs font-bold tabular-nums ${isIn ? "text-emerald-600" : "text-red-500"}`}>
+                        {isIn ? "+" : ""}{txn.quantity} {item?.unit}
                       </span>
                     </div>
                     <div className="flex items-center justify-between mt-0.5">
                       <span className="text-[10px] text-[var(--color-text-tertiary)] capitalize">
                         {txn.type}
+                        {/* Who recorded it */}
+                        {txn.recorder && (
+                          <span className="text-[var(--color-text-tertiary)]">
+                            {" · "}{(txn.recorder as { full_name: string }).full_name}
+                          </span>
+                        )}
                       </span>
                       <span className="text-[10px] text-[var(--color-text-tertiary)] tabular-nums">
-                        Balance: {txn.balance_after}
+                        Bal: {txn.balance_after}
                       </span>
                     </div>
+                    {/* Cost fields */}
+                    {(txn.unit_cost || txn.total_cost) && (
+                      <div className="flex items-center justify-between mt-0.5">
+                        {txn.unit_cost && (
+                          <span className="text-[10px] text-[var(--color-text-tertiary)]">
+                            Unit: KES {Number(txn.unit_cost).toLocaleString()}
+                          </span>
+                        )}
+                        {txn.total_cost && (
+                          <span className="text-[10px] font-medium text-[var(--color-text-secondary)] tabular-nums">
+                            Total: KES {Number(txn.total_cost).toLocaleString()}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                    {txn.reference && (
+                      <p className="text-[10px] text-brand-600 mt-0.5">Ref: {txn.reference}</p>
+                    )}
                   </div>
                 );
               })
             ) : (
-              <div className="p-8 text-center text-sm text-[var(--color-text-tertiary)]">
+              <div className="p-8 text-center text-sm text-text-tertiary">
                 No activity yet
               </div>
             )}
